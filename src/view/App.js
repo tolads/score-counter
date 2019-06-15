@@ -1,34 +1,20 @@
 import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import Box from '@material-ui/core/Box';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import IconButton from '@material-ui/core/IconButton';
-import Link from '@material-ui/core/Link';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Slide from '@material-ui/core/Slide';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import HomeIcon from '@material-ui/icons/Home';
-import InfoIcon from '@material-ui/icons/Info';
 import MenuIcon from '@material-ui/icons/Menu';
 
-function HideOnScroll(props) {
-  const { children } = props;
-  const trigger = useScrollTrigger();
-
-  return (
-    <Slide appear={true} direction="down" in={!trigger}>
-      {children}
-    </Slide>
-  );
-}
+import HideOnScroll from './HideOnScroll';
+import pages from './pages';
 
 const useStyles = makeStyles(theme => ({
   list: {
@@ -42,31 +28,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const pages = [
-  {
-    id: 'home',
-    label: 'Kezdőlap',
-    icon: <HomeIcon />,
-    component: () => <p>Lorem ipsum</p>,
-  },
-  {
-    id: 'about',
-    label: 'Infó',
-    icon: <InfoIcon />,
-    component: () => (
-      <Box my={2}>
-        <Typography variant="body1">
-          Ez egy pontszám-nyilvántartó alkalmazás. Elsőroban snapszer kártyajátékhoz készült a
-          Magyar Snapszer Szövetség hivatalos{' '}
-          <Link href="https://snapszer.hu/hu/hivatalos-versenyszabalyzat/">versenyszabályzata</Link>{' '}
-          alapján.
-        </Typography>
-      </Box>
-    ),
-  },
-];
-
-function App() {
+export default function App() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(pages[0]);
@@ -89,7 +51,7 @@ function App() {
     >
       <List>
         {pages.map(page => (
-          <ListItem button onClick={() => setCurrentPage(page)}>
+          <ListItem key={page.id} button onClick={() => setCurrentPage(page)}>
             <ListItemIcon>{page.icon}</ListItemIcon>
             <ListItemText primary={page.label} />
           </ListItem>
@@ -129,5 +91,3 @@ function App() {
     </>
   );
 }
-
-export default App;
