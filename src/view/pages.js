@@ -6,7 +6,8 @@ import InfoIcon from '@material-ui/icons/Info';
 import About from './About';
 import Home from './Home';
 import NewGame from './NewGame';
-import { newGame } from './pageIds';
+import Scores from './Scores';
+import { newGame, scores } from './pageIds';
 
 export default [
   {
@@ -20,6 +21,11 @@ export default [
     label: 'Új Játék',
     icon: <FiberNewIcon />,
     component: NewGame,
+  },
+  {
+    id: scores,
+    component: Scores,
+    hideFromMenu: true,
   },
   {
     id: 'about',

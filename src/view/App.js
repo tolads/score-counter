@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
@@ -12,7 +12,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
+import _ from 'lodash';
 
+import GameContext from './GameContext';
 import HideOnScroll from './HideOnScroll';
 import MenuContext from './MenuContext';
 import pages from './pages';
@@ -29,9 +31,64 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const initialState = {
+  currentGameId: null,
+  games: [],
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_CURRENT_GAME':
+      return { ...state, currentGameId: action.id };
+    case 'START_NEW_GAME': {
+      const id = _.uniqueId();
+      return {
+        ...state,
+        currentGameId: id,
+        games: [
+          ...state.games,
+          {
+            id,
+            date: new Date(),
+            players: action.players,
+            rounds: [
+              action.players.reduce((acc, curr) => ({ ...acc, [curr]: 7 }), {}),
+              action.players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {}),
+            ],
+          },
+        ],
+      };
+    }
+    case 'UPDATE_SCORE': {
+      return {
+        ...state,
+        games: state.games.map(game => {
+          if (game.id !== action.id) {
+            return game;
+          }
+          let rounds = game.rounds.map((round, roundId) =>
+            roundId !== action.round ? round : { ...round, [action.player]: action.value },
+          );
+          const lastRound = rounds[rounds.length - 1];
+          if (game.players.some(player => typeof lastRound[player] === 'number')) {
+            rounds = [
+              ...rounds,
+              game.players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {}),
+            ];
+          }
+          return { ...game, rounds };
+        }),
+      };
+    }
+    default:
+      throw new Error();
+  }
+};
+
 export default function App() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const [gameState, dispatch] = useReducer(reducer, initialState);
   const [currentPage, setCurrentPage] = useState(pages[0].id);
   const CurrentPageComponent = pages.find(({ id }) => id === currentPage).component;
 
@@ -51,12 +108,14 @@ export default function App() {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        {pages.map(page => (
-          <ListItem key={page.id} button onClick={() => setCurrentPage(page.id)}>
-            <ListItemIcon>{page.icon}</ListItemIcon>
-            <ListItemText primary={page.label} />
-          </ListItem>
-        ))}
+        {pages
+          .filter(page => !page.hideFromMenu)
+          .map(page => (
+            <ListItem key={page.id} button onClick={() => setCurrentPage(page.id)}>
+              <ListItemIcon>{page.icon}</ListItemIcon>
+              <ListItemText primary={page.label} />
+            </ListItem>
+          ))}
       </List>
     </div>
   );
@@ -88,7 +147,9 @@ export default function App() {
       <Toolbar />
       <Container>
         <MenuContext.Provider value={{ currentPage, setCurrentPage }}>
-          <CurrentPageComponent />
+          <GameContext.Provider value={{ gameState, dispatch }}>
+            <CurrentPageComponent />
+          </GameContext.Provider>
         </MenuContext.Provider>
       </Container>
     </>
