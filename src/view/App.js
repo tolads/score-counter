@@ -14,6 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 
 import HideOnScroll from './HideOnScroll';
+import MenuContext from './MenuContext';
 import pages from './pages';
 
 const useStyles = makeStyles(theme => ({
@@ -31,8 +32,8 @@ const useStyles = makeStyles(theme => ({
 export default function App() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(pages[0]);
-  const CurrentPageComponent = currentPage.component;
+  const [currentPage, setCurrentPage] = useState(pages[0].id);
+  const CurrentPageComponent = pages.find(({ id }) => id === currentPage).component;
 
   const toggleDrawer = value => event => {
     if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -51,7 +52,7 @@ export default function App() {
     >
       <List>
         {pages.map(page => (
-          <ListItem key={page.id} button onClick={() => setCurrentPage(page)}>
+          <ListItem key={page.id} button onClick={() => setCurrentPage(page.id)}>
             <ListItemIcon>{page.icon}</ListItemIcon>
             <ListItemText primary={page.label} />
           </ListItem>
@@ -86,7 +87,9 @@ export default function App() {
       </HideOnScroll>
       <Toolbar />
       <Container>
-        <CurrentPageComponent />
+        <MenuContext.Provider value={{ currentPage, setCurrentPage }}>
+          <CurrentPageComponent />
+        </MenuContext.Provider>
       </Container>
     </>
   );
