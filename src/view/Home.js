@@ -17,21 +17,23 @@ export default function Home() {
   const startNewGame = () => setCurrentPage(newGame);
   const renderScores = () => (
     <List>
-      {gameState.games.map(game => (
-        <ListItem
-          key={game.id}
-          button
-          onClick={() => {
-            dispatch({ type: 'SET_CURRENT_GAME', id: game.id });
-            setCurrentPage(scores);
-          }}
-        >
-          <ListItemText
-            primary={format(game.date, 'YYYY.MM.DD HH:mm')}
-            secondary={game.players.join(', ')}
-          />
-        </ListItem>
-      ))}
+      {gameState.games
+        .sort((a, b) => b.date - a.date)
+        .map(game => (
+          <ListItem
+            key={game.id}
+            button
+            onClick={() => {
+              dispatch({ type: 'SET_CURRENT_GAME', id: game.id });
+              setCurrentPage(scores);
+            }}
+          >
+            <ListItemText
+              primary={format(game.date, 'YYYY.MM.DD HH:mm')}
+              secondary={game.players.join(', ')}
+            />
+          </ListItem>
+        ))}
     </List>
   );
 
