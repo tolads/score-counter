@@ -108,15 +108,17 @@ export default function App() {
 
   useEffect(() => {
     return auth.onAuthStateChanged(userProp => {
-      if (userProp && user !== userProp) {
+      if (userProp && user !== userProp && window.navigator.onLine) {
         gameState.games.map(async game => {
           const { id, ...rest } = game;
-          const docRef = await db
-            .collection(USERS)
-            .doc(userProp.uid)
-            .collection(GAMES)
-            .add(rest);
-          dispatch({ type: 'CHANGE_ID', oldId: game.id, newId: docRef.id });
+          try {
+            const docRef = await db
+              .collection(USERS)
+              .doc(userProp.uid)
+              .collection(GAMES)
+              .add(rest);
+            dispatch({ type: 'CHANGE_ID', oldId: game.id, newId: docRef.id });
+          } catch (x) {}
         });
       }
 
@@ -126,22 +128,53 @@ export default function App() {
   }, [gameState.games, user]);
 
   useEffect(() => {
-    if (user && user.uid) {
-      return db
-        .collection(USERS)
-        .doc(user.uid)
-        .collection(GAMES)
-        .onSnapshot(({ docs, metadata }) => {
-          if (docs.length) {
-            dispatch({
-              type: 'UPDATE_GAMES',
-              games: docs.map(doc => {
-                const game = doc.data();
-                return { ...game, date: game.date.toDate(), id: doc.id };
-              }),
-            });
+    const handleOnline = () => {
+      if (!user || !user.uid) {
+        return;
+      }
+      gameState.games.map(async game => {
+        const { id, ...rest } = game;
+        try {
+          if (typeof id === 'number') {
+            const docRef = await db
+              .collection(USERS)
+              .doc(user.uid)
+              .collection(GAMES)
+              .add(rest);
+            dispatch({ type: 'CHANGE_ID', oldId: game.id, newId: docRef.id });
+          } else {
+            db.collection(USERS)
+              .doc(user.uid)
+              .collection(GAMES)
+              .doc(id)
+              .set(rest);
           }
-        });
+        } catch (x) {}
+      });
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [gameState.games, user]);
+
+  useEffect(() => {
+    if (user && user.uid && window.navigator.onLine) {
+      try {
+        return db
+          .collection(USERS)
+          .doc(user.uid)
+          .collection(GAMES)
+          .onSnapshot(({ docs }) => {
+            if (docs.length) {
+              dispatch({
+                type: 'UPDATE_GAMES',
+                games: docs.map(doc => {
+                  const game = doc.data();
+                  return { ...game, date: game.date.toDate(), id: doc.id };
+                }),
+              });
+            }
+          });
+      } catch (x) {}
     }
   }, [user]);
 
@@ -154,7 +187,7 @@ export default function App() {
         players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {}),
       ],
     };
-    if (user && user.uid) {
+    if (user && user.uid && window.navigator.onLine) {
       try {
         const docRef = await db
           .collection(USERS)
@@ -165,7 +198,7 @@ export default function App() {
       } catch (x) {}
     }
     if (newGame.id === undefined) {
-      newGame.id = _.uniqueId();
+      newGame.id = Number(_.uniqueId());
     }
     dispatch({ type: 'START_NEW_GAME', newGame });
   };
@@ -182,12 +215,14 @@ export default function App() {
       if (game.players.some(player => typeof lastRound[player] === 'number')) {
         rounds = [...rounds, game.players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {})];
       }
-      if (user && user.uid) {
-        db.collection(USERS)
-          .doc(user.uid)
-          .collection(GAMES)
-          .doc(action.id)
-          .set({ ...game, rounds });
+      if (user && user.uid && window.navigator.onLine) {
+        try {
+          db.collection(USERS)
+            .doc(user.uid)
+            .collection(GAMES)
+            .doc(action.id)
+            .set({ ...game, rounds });
+        } catch (x) {}
       }
       return { ...game, rounds };
     });
