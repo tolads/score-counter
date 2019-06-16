@@ -8,11 +8,19 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
 import { format } from 'date-fns';
 
 import GameContext from './GameContext';
 
+const useStyles = makeStyles(theme => ({
+  tableContainer: {
+    overflowX: 'auto',
+  },
+}));
+
 export default function Scores() {
+  const classes = useStyles();
   const { gameState, updateScore } = useContext(GameContext);
   const currentGame = gameState.games.find(({ id }) => id === gameState.currentGameId);
   const handleChange = event => {
@@ -32,7 +40,7 @@ export default function Scores() {
       <Typography variant="subtitle1">
         Kezdés: {format(currentGame.date, 'YYYY.MM.DD HH:mm')}
       </Typography>
-      <Paper>
+      <Paper className={classes.tableContainer}>
         <Table>
           <TableHead>
             <TableRow>
