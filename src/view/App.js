@@ -106,26 +106,30 @@ export default function App() {
   const hideDialog = () => setDialogShown(false);
   const showDrawer = () => setDrawerOpen(true);
 
-  useEffect(() => {
-    return auth.onAuthStateChanged(userProp => {
-      if (userProp && user !== userProp && window.navigator.onLine) {
-        gameState.games.map(async game => {
-          const { id, ...rest } = game;
-          try {
-            const docRef = await db
-              .collection(USERS)
-              .doc(userProp.uid)
-              .collection(GAMES)
-              .add(rest);
-            dispatch({ type: 'CHANGE_ID', oldId: game.id, newId: docRef.id });
-          } catch (x) {}
-        });
-      }
+  useEffect(
+    () =>
+      auth.onAuthStateChanged(userProp => {
+        if (userProp && user !== userProp && navigator.onLine) {
+          gameState.games.map(async game => {
+            const { id, ...rest } = game;
+            try {
+              const docRef = await db
+                .collection(USERS)
+                .doc(userProp.uid)
+                .collection(GAMES)
+                .add(rest);
+              dispatch({ type: 'CHANGE_ID', oldId: game.id, newId: docRef.id });
+            } catch (err) {
+              console.error(err);
+            }
+          });
+        }
 
-      setUser(userProp);
-      hideDialog();
-    });
-  }, [gameState.games, user]);
+        setUser(userProp);
+        hideDialog();
+      }),
+    [gameState.games, user],
+  );
 
   useEffect(() => {
     const handleOnline = () => {
@@ -149,7 +153,9 @@ export default function App() {
               .doc(id)
               .set(rest);
           }
-        } catch (x) {}
+        } catch (err) {
+          console.error(err);
+        }
       });
     };
     window.addEventListener('online', handleOnline);
@@ -157,7 +163,7 @@ export default function App() {
   }, [gameState.games, user]);
 
   useEffect(() => {
-    if (user && user.uid && window.navigator.onLine) {
+    if (user && user.uid && navigator.onLine) {
       try {
         return db
           .collection(USERS)
@@ -174,8 +180,11 @@ export default function App() {
               });
             }
           });
-      } catch (x) {}
+      } catch (err) {
+        console.error(err);
+      }
     }
+    return null;
   }, [user]);
 
   const startNewGame = async players => {
@@ -187,7 +196,7 @@ export default function App() {
         players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {}),
       ],
     };
-    if (user && user.uid && window.navigator.onLine) {
+    if (user && user.uid && navigator.onLine) {
       try {
         const docRef = await db
           .collection(USERS)
@@ -195,7 +204,9 @@ export default function App() {
           .collection(GAMES)
           .add(newGame);
         newGame.id = docRef.id;
-      } catch (x) {}
+      } catch (err) {
+        console.error(err);
+      }
     }
     if (newGame.id === undefined) {
       newGame.id = Number(_.uniqueId());
@@ -215,14 +226,16 @@ export default function App() {
       if (game.players.some(player => typeof lastRound[player] === 'number')) {
         rounds = [...rounds, game.players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {})];
       }
-      if (user && user.uid && window.navigator.onLine) {
+      if (user && user.uid && navigator.onLine) {
         try {
           db.collection(USERS)
             .doc(user.uid)
             .collection(GAMES)
             .doc(action.id)
             .set({ ...game, rounds });
-        } catch (x) {}
+        } catch (err) {
+          console.error(err);
+        }
       }
       return { ...game, rounds };
     });
@@ -248,7 +261,7 @@ export default function App() {
       {user ? (
         [
           <MenuItem key="1" disabled>
-            Belépve, mint {user.displayName}
+            {`Belépve, mint ${user.displayName}`}
           </MenuItem>,
           <MenuItem key="2" onClick={signOut}>
             Kilépés
@@ -307,7 +320,14 @@ export default function App() {
       <Toolbar />
 
       <Container>
-        <GameContext.Provider value={{ gameState, dispatch, startNewGame, updateScore }}>
+        <GameContext.Provider
+          value={{
+            gameState,
+            dispatch,
+            startNewGame,
+            updateScore,
+          }}
+        >
           <CurrentPageComponent />
         </GameContext.Provider>
       </Container>

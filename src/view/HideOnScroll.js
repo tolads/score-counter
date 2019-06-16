@@ -7,7 +7,7 @@ export default function HideOnScroll(props) {
   const trigger = useScrollTrigger();
 
   return (
-    <Slide appear={true} direction="down" in={!trigger}>
+    <Slide appear direction="down" in={!trigger}>
       {children}
     </Slide>
   );

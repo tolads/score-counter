@@ -16,11 +16,11 @@ export default function NewGame() {
   const { startNewGame } = useContext(GameContext);
   const { setCurrentPage } = useContext(MenuContext);
   const [players, setPlayers] = useState(['', '']);
-  const addPlayer = () => setPlayers(players => [...players, '']);
+  const addPlayer = () => setPlayers(prevState => [...prevState, '']);
   const handleChange = event => {
     const { name, value } = event.target;
     const editedId = Number(name);
-    setPlayers(players => players.map((player, id) => (editedId === id ? value : player)));
+    setPlayers(prevState => prevState.map((player, id) => (editedId === id ? value : player)));
   };
   const start = () => {
     startNewGame(players);
@@ -39,6 +39,7 @@ export default function NewGame() {
       <Typography variant="h6">Játékosok:</Typography>
       <List>
         {players.map((player, id) => (
+          // eslint-disable-next-line react/no-array-index-key
           <ListItem key={id}>
             <Input name={String(id)} onChange={handleChange} value={player} />
           </ListItem>

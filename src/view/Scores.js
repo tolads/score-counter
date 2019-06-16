@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 
 import GameContext from './GameContext';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   tableContainer: {
     overflowX: 'auto',
   },
@@ -38,7 +38,7 @@ export default function Scores() {
   const renderScores = () => (
     <>
       <Typography variant="subtitle1">
-        Kezdés: {format(currentGame.date, 'YYYY.MM.DD HH:mm')}
+        {`Kezdés: ${format(currentGame.date, 'YYYY.MM.DD HH:mm')}`}
       </Typography>
       <Paper className={classes.tableContainer}>
         <Table>
@@ -52,6 +52,7 @@ export default function Scores() {
           </TableHead>
           <TableBody>
             {currentGame.rounds.map((round, roundId) => (
+              // eslint-disable-next-line react/no-array-index-key
               <TableRow key={roundId}>
                 <TableCell variant="head">{`#${roundId}`}</TableCell>
                 {currentGame.players.map(player => (
