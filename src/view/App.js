@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
@@ -19,7 +19,7 @@ import { auth, db, uiConfig } from '../api/firebase';
 import Drawer from './Drawer';
 import GameContext from './GameContext';
 import HideOnScroll from './HideOnScroll';
-import MenuContext from './MenuContext';
+import { MenuContext } from './MenuContext';
 import pages from './pages';
 
 const USERS = 'users';
@@ -80,10 +80,10 @@ const reducer = (state, action) => {
   }
 };
 export default function App() {
+  const { currentPage, setCurrentPage } = useContext(MenuContext);
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(pages[0].id);
   const [user, setUser] = useState(null);
   const [dialogShown, setDialogShown] = useState(false);
 
@@ -184,7 +184,7 @@ export default function App() {
         console.error(err);
       }
     }
-    return null;
+    return undefined;
   }, [user]);
 
   const startNewGame = async players => {

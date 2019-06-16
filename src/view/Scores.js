@@ -22,6 +22,7 @@ const useStyles = makeStyles(() => ({
 export default function Scores() {
   const classes = useStyles();
   const { gameState, updateScore } = useContext(GameContext);
+
   const currentGame = gameState.games.find(({ id }) => id === gameState.currentGameId);
   const handleChange = event => {
     const { name, value } = event.target;
@@ -34,6 +35,22 @@ export default function Scores() {
       value: value === '' ? null : Number(value),
     });
   };
+
+  const renderRow = (round, roundId) => (
+    <TableRow key={roundId}>
+      <TableCell variant="head">{`#${roundId}`}</TableCell>
+      {currentGame.players.map(player => (
+        <TableCell key={player}>
+          <Input
+            type="number"
+            name={`${roundId}_${player}`}
+            onChange={handleChange}
+            value={round[player] === null ? '' : round[player]}
+          />
+        </TableCell>
+      ))}
+    </TableRow>
+  );
 
   const renderScores = () => (
     <>
@@ -50,24 +67,7 @@ export default function Scores() {
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>
-            {currentGame.rounds.map((round, roundId) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <TableRow key={roundId}>
-                <TableCell variant="head">{`#${roundId}`}</TableCell>
-                {currentGame.players.map(player => (
-                  <TableCell key={player}>
-                    <Input
-                      type="number"
-                      name={`${roundId}_${player}`}
-                      onChange={handleChange}
-                      value={round[player] === null ? '' : round[player]}
-                    />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentGame.rounds.map(renderRow)}</TableBody>
         </Table>
       </Paper>
     </>

@@ -6,7 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import { makeStyles } from '@material-ui/core/styles';
 
-import MenuContext from './MenuContext';
+import { MenuContext } from './MenuContext';
 import pages from './pages';
 
 const useStyles = makeStyles(() => ({

@@ -8,13 +8,15 @@ import Typography from '@material-ui/core/Typography';
 import { format } from 'date-fns';
 
 import GameContext from './GameContext';
-import MenuContext from './MenuContext';
+import { MenuContext } from './MenuContext';
 import { newGame, scores } from './pageIds';
 
 export default function Home() {
   const { gameState, dispatch } = useContext(GameContext);
   const { setCurrentPage } = useContext(MenuContext);
+
   const startNewGame = () => setCurrentPage(newGame);
+
   const renderScores = () => (
     <List>
       {gameState.games

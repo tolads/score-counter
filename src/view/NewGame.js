@@ -9,13 +9,14 @@ import AddIcon from '@material-ui/icons/Add';
 import _ from 'lodash';
 
 import GameContext from './GameContext';
-import MenuContext from './MenuContext';
+import { MenuContext } from './MenuContext';
 import { scores } from './pageIds';
 
 export default function NewGame() {
   const { startNewGame } = useContext(GameContext);
   const { setCurrentPage } = useContext(MenuContext);
   const [players, setPlayers] = useState(['', '']);
+
   const addPlayer = () => setPlayers(prevState => [...prevState, '']);
   const handleChange = event => {
     const { name, value } = event.target;
