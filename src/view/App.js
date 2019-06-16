@@ -117,6 +117,65 @@ export default function App() {
     });
   }, []);
 
+  const renderMenu = () => (
+    <Menu
+      id="menu-appbar"
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={accountDropdownShown}
+      onClose={handleClose}
+    >
+      {user ? (
+        [
+          <MenuItem key="1" disabled>
+            Belépve, mint {user.displayName}
+          </MenuItem>,
+          <MenuItem key="2" onClick={signOut}>
+            Kilépés
+          </MenuItem>,
+        ]
+      ) : (
+        <MenuItem onClick={showDialog}>Belépés</MenuItem>
+      )}
+    </Menu>
+  );
+
+  const renderToolbar = () => (
+    <Toolbar>
+      <IconButton
+        edge="start"
+        className={classes.menuButton}
+        color="inherit"
+        aria-label="Menu"
+        onClick={showDrawer}
+      >
+        <MenuIcon />
+      </IconButton>
+      <Typography variant="h6" className={classes.title}>
+        Score Counter
+      </Typography>
+      <div>
+        <IconButton
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleMenu}
+          color="inherit"
+        >
+          <AccountCircle />
+        </IconButton>
+        {renderMenu()}
+      </div>
+    </Toolbar>
+  );
+
   return (
     <MenuContext.Provider value={{ currentPage, setCurrentPage }}>
       <CssBaseline />
@@ -130,60 +189,7 @@ export default function App() {
       <Drawer open={drawerOpen} setOpen={setDrawerOpen} />
 
       <HideOnScroll>
-        <AppBar>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              color="inherit"
-              aria-label="Menu"
-              onClick={showDrawer}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              Score Counter
-            </Typography>
-            <div>
-              <IconButton
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={accountDropdownShown}
-                onClose={handleClose}
-              >
-                {user ? (
-                  [
-                    <MenuItem key="1" disabled>
-                      Belépve, mint {user.displayName}
-                    </MenuItem>,
-                    <MenuItem key="2" onClick={signOut}>
-                      Kilépés
-                    </MenuItem>,
-                  ]
-                ) : (
-                  <MenuItem onClick={showDialog}>Belépés</MenuItem>
-                )}
-              </Menu>
-            </div>
-          </Toolbar>
-        </AppBar>
+        <AppBar>{renderToolbar()}</AppBar>
       </HideOnScroll>
 
       <Toolbar />
