@@ -1,11 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { init as initFirebase } from './api/firebase';
 import App from './view/App';
 import * as serviceWorker from './serviceWorker';
-
-initFirebase();
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

@@ -13,7 +13,7 @@ import MenuContext from './MenuContext';
 import { scores } from './pageIds';
 
 export default function NewGame() {
-  const { dispatch } = useContext(GameContext);
+  const { startNewGame } = useContext(GameContext);
   const { setCurrentPage } = useContext(MenuContext);
   const [players, setPlayers] = useState(['', '']);
   const addPlayer = () => setPlayers(players => [...players, '']);
@@ -23,7 +23,7 @@ export default function NewGame() {
     setPlayers(players => players.map((player, id) => (editedId === id ? value : player)));
   };
   const start = () => {
-    dispatch({ type: 'START_NEW_GAME', players });
+    startNewGame(players);
     setCurrentPage(scores);
   };
   const canStart =

@@ -13,12 +13,12 @@ import { format } from 'date-fns';
 import GameContext from './GameContext';
 
 export default function Scores() {
-  const { gameState, dispatch } = useContext(GameContext);
+  const { gameState, updateScore } = useContext(GameContext);
   const currentGame = gameState.games.find(({ id }) => id === gameState.currentGameId);
   const handleChange = event => {
     const { name, value } = event.target;
     const [round, player] = name.split('_');
-    dispatch({
+    updateScore({
       type: 'UPDATE_SCORE',
       id: gameState.currentGameId,
       round: Number(round),
