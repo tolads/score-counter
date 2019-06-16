@@ -5,13 +5,8 @@ import Container from '@material-ui/core/Container';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -21,15 +16,13 @@ import _ from 'lodash';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 import { auth, uiConfig } from '../api/firebase';
+import Drawer from './Drawer';
 import GameContext from './GameContext';
 import HideOnScroll from './HideOnScroll';
 import MenuContext from './MenuContext';
 import pages from './pages';
 
 const useStyles = makeStyles(theme => ({
-  list: {
-    width: 250,
-  },
   menuButton: {
     marginRight: theme.spacing(2),
   },
@@ -95,13 +88,14 @@ const reducer = (state, action) => {
 export default function App() {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [gameState, dispatch] = useReducer(reducer, initialState);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(pages[0].id);
-  const CurrentPageComponent = pages.find(({ id }) => id === currentPage).component;
-  const accountDropdownShown = Boolean(anchorEl);
   const [user, setUser] = useState(null);
   const [dialogShown, setDialogShown] = useState(false);
+  const [gameState, dispatch] = useReducer(reducer, initialState);
+
+  const CurrentPageComponent = pages.find(({ id }) => id === currentPage).component;
+  const accountDropdownShown = Boolean(anchorEl);
 
   const handleMenu = event => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -114,6 +108,7 @@ export default function App() {
     handleClose();
   };
   const hideDialog = () => setDialogShown(false);
+  const showDrawer = () => setDrawerOpen(true);
 
   useEffect(() => {
     return auth().onAuthStateChanged(user => {
@@ -122,36 +117,8 @@ export default function App() {
     });
   }, []);
 
-  const toggleDrawer = value => event => {
-    if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-
-    setOpen(value);
-  };
-
-  const renderSidebar = () => (
-    <div
-      className={classes.list}
-      role="presentation"
-      onClick={toggleDrawer(false)}
-      onKeyDown={toggleDrawer(false)}
-    >
-      <List>
-        {pages
-          .filter(page => !page.hideFromMenu)
-          .map(page => (
-            <ListItem key={page.id} button onClick={() => setCurrentPage(page.id)}>
-              <ListItemIcon>{page.icon}</ListItemIcon>
-              <ListItemText primary={page.label} />
-            </ListItem>
-          ))}
-      </List>
-    </div>
-  );
-
   return (
-    <>
+    <MenuContext.Provider value={{ currentPage, setCurrentPage }}>
       <CssBaseline />
 
       <Dialog open={dialogShown} onClose={hideDialog}>
@@ -160,9 +127,7 @@ export default function App() {
         </DialogContent>
       </Dialog>
 
-      <SwipeableDrawer open={open} onClose={toggleDrawer(false)} onOpen={toggleDrawer(true)}>
-        {renderSidebar()}
-      </SwipeableDrawer>
+      <Drawer open={drawerOpen} setOpen={setDrawerOpen} />
 
       <HideOnScroll>
         <AppBar>
@@ -172,7 +137,7 @@ export default function App() {
               className={classes.menuButton}
               color="inherit"
               aria-label="Menu"
-              onClick={toggleDrawer(true)}
+              onClick={showDrawer}
             >
               <MenuIcon />
             </IconButton>
@@ -224,12 +189,10 @@ export default function App() {
       <Toolbar />
 
       <Container>
-        <MenuContext.Provider value={{ currentPage, setCurrentPage }}>
-          <GameContext.Provider value={{ gameState, dispatch }}>
-            <CurrentPageComponent />
-          </GameContext.Provider>
-        </MenuContext.Provider>
+        <GameContext.Provider value={{ gameState, dispatch }}>
+          <CurrentPageComponent />
+        </GameContext.Provider>
       </Container>
-    </>
+    </MenuContext.Provider>
   );
 }
