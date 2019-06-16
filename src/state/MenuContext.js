@@ -1,11 +1,11 @@
 import React, { createContext, useState } from 'react';
 
-import pages from './pages';
+import { home } from './pageIds';
 
 export const MenuContext = createContext();
 
 export default function MenuProvider({ children }) {
-  const [currentPage, setCurrentPage] = useState(pages[0].id);
+  const [currentPage, setCurrentPage] = useState(home);
 
   return (
     <MenuContext.Provider value={{ currentPage, setCurrentPage }}>{children}</MenuContext.Provider>

@@ -7,12 +7,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import { format } from 'date-fns';
 
-import GameContext from './GameContext';
-import { MenuContext } from './MenuContext';
-import { newGame, scores } from './pageIds';
+import { GameContext } from '../state/GameContext';
+import { MenuContext } from '../state/MenuContext';
+import { newGame, scores } from '../state/pageIds';
 
 export default function Home() {
-  const { gameState, dispatch } = useContext(GameContext);
+  const { state: gameState, dispatch } = useContext(GameContext);
   const { setCurrentPage } = useContext(MenuContext);
 
   const startNewGame = () => setCurrentPage(newGame);

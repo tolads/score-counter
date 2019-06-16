@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { format } from 'date-fns';
 
-import GameContext from './GameContext';
+import { GameContext } from '../state/GameContext';
 
 const useStyles = makeStyles(() => ({
   tableContainer: {
@@ -21,7 +21,7 @@ const useStyles = makeStyles(() => ({
 
 export default function Scores() {
   const classes = useStyles();
-  const { gameState, updateScore } = useContext(GameContext);
+  const { state: gameState, updateScore } = useContext(GameContext);
 
   const currentGame = gameState.games.find(({ id }) => id === gameState.currentGameId);
   const handleChange = event => {

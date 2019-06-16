@@ -8,9 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import _ from 'lodash';
 
-import GameContext from './GameContext';
-import { MenuContext } from './MenuContext';
-import { scores } from './pageIds';
+import { GameContext } from '../state/GameContext';
+import { MenuContext } from '../state/MenuContext';
+import { scores } from '../state/pageIds';
 
 export default function NewGame() {
   const { startNewGame } = useContext(GameContext);

@@ -7,11 +7,11 @@ import About from './About';
 import Home from './Home';
 import NewGame from './NewGame';
 import Scores from './Scores';
-import { newGame, scores } from './pageIds';
+import { about, home, newGame, scores } from '../state/pageIds';
 
 export default [
   {
-    id: 'home',
+    id: home,
     label: 'Kezdőlap',
     icon: <HomeIcon />,
     component: Home,
@@ -28,7 +28,7 @@ export default [
     hideFromMenu: true,
   },
   {
-    id: 'about',
+    id: about,
     label: 'Infó',
     icon: <InfoIcon />,
     component: About,
