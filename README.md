@@ -2,4 +2,4 @@
 
 ## Demo
 
-- https://snapszer-score-counter.firebaseapp.com/
+- https://snapszer-score-counter.web.app/

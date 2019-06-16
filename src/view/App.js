@@ -1,19 +1,26 @@
-import React, { useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import _ from 'lodash';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
+import { auth, uiConfig } from '../api/firebase';
 import GameContext from './GameContext';
 import HideOnScroll from './HideOnScroll';
 import MenuContext from './MenuContext';
@@ -87,10 +94,33 @@ const reducer = (state, action) => {
 
 export default function App() {
   const classes = useStyles();
+  const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
   const [gameState, dispatch] = useReducer(reducer, initialState);
   const [currentPage, setCurrentPage] = useState(pages[0].id);
   const CurrentPageComponent = pages.find(({ id }) => id === currentPage).component;
+  const accountDropdownShown = Boolean(anchorEl);
+  const [user, setUser] = useState(null);
+  const [dialogShown, setDialogShown] = useState(false);
+
+  const handleMenu = event => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const signOut = () => {
+    auth().signOut();
+    handleClose();
+  };
+  const showDialog = () => {
+    setDialogShown(true);
+    handleClose();
+  };
+  const hideDialog = () => setDialogShown(false);
+
+  useEffect(() => {
+    return auth().onAuthStateChanged(user => {
+      setUser(user);
+      hideDialog();
+    });
+  }, []);
 
   const toggleDrawer = value => event => {
     if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -123,9 +153,17 @@ export default function App() {
   return (
     <>
       <CssBaseline />
+
+      <Dialog open={dialogShown} onClose={hideDialog}>
+        <DialogContent>
+          <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth()} />
+        </DialogContent>
+      </Dialog>
+
       <SwipeableDrawer open={open} onClose={toggleDrawer(false)} onOpen={toggleDrawer(true)}>
         {renderSidebar()}
       </SwipeableDrawer>
+
       <HideOnScroll>
         <AppBar>
           <Toolbar>
@@ -141,10 +179,50 @@ export default function App() {
             <Typography variant="h6" className={classes.title}>
               Score Counter
             </Typography>
+            <div>
+              <IconButton
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={accountDropdownShown}
+                onClose={handleClose}
+              >
+                {user ? (
+                  [
+                    <MenuItem key="1" disabled>
+                      Belépve, mint {user.displayName}
+                    </MenuItem>,
+                    <MenuItem key="2" onClick={signOut}>
+                      Kilépés
+                    </MenuItem>,
+                  ]
+                ) : (
+                  <MenuItem onClick={showDialog}>Belépés</MenuItem>
+                )}
+              </Menu>
+            </div>
           </Toolbar>
         </AppBar>
       </HideOnScroll>
+
       <Toolbar />
+
       <Container>
         <MenuContext.Provider value={{ currentPage, setCurrentPage }}>
           <GameContext.Provider value={{ gameState, dispatch }}>
