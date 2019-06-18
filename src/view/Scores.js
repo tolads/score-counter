@@ -54,7 +54,7 @@ export default function Scores() {
   const renderScores = () => (
     <>
       <Typography variant="subtitle1">
-        {`Kezdés: ${format(currentGame.date, 'YYYY.MM.DD HH:mm')}`}
+        {`Kezdés: ${format(currentGame.dateCreated, 'YYYY.MM.DD HH:mm')}`}
       </Typography>
       <Paper className={classes.tableContainer}>
         <Table>

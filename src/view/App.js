@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import Chip from '@material-ui/core/Chip';
 import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import IconButton from '@material-ui/core/IconButton';
@@ -39,6 +40,7 @@ export default function App() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogShown, setDialogShown] = useState(false);
+  const [offline, setISOffline] = useState(!navigator.onLine);
 
   const CurrentPageComponent = pages.find(({ id }) => id === currentPage).component;
   const accountDropdownShown = Boolean(anchorEl);
@@ -62,6 +64,16 @@ export default function App() {
       hideDialog();
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleChange = () => setISOffline(!navigator.onLine);
+    window.addEventListener('online', handleChange);
+    window.addEventListener('offline', handleChange);
+    return () => {
+      window.removeEventListener('online', handleChange);
+      window.removeEventListener('offline', handleChange);
+    };
+  }, []);
 
   const renderMenu = () => (
     <Menu
@@ -108,6 +120,7 @@ export default function App() {
       <Typography variant="h6" className={classes.title}>
         Score Counter
       </Typography>
+      {offline && <Chip color="secondary" label="OFFLINE" size="small" />}
       <div>
         <IconButton
           aria-controls="menu-appbar"

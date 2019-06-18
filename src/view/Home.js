@@ -20,7 +20,7 @@ export default function Home() {
   const renderScores = () => (
     <List>
       {gameState.games
-        .sort((a, b) => b.date - a.date)
+        .sort((a, b) => b.dateCreated - a.dateCreated)
         .map(game => (
           <ListItem
             key={game.id}
@@ -31,7 +31,7 @@ export default function Home() {
             }}
           >
             <ListItemText
-              primary={format(game.date, 'YYYY.MM.DD HH:mm')}
+              primary={format(game.dateCreated, 'YYYY.MM.DD HH:mm')}
               secondary={game.players.join(', ')}
             />
           </ListItem>

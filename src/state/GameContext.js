@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, useState, useRef } from 'react';
 import _ from 'lodash';
 
 import { db } from '../api/firebase';
@@ -57,6 +57,7 @@ export default function GameProvider({ children }) {
   const { user } = useContext(UserContext);
   const prevUser = useRef(user);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [lastOnline, setLastOnline] = useState(null);
 
   // handle signing in
   useEffect(() => {
@@ -76,6 +77,13 @@ export default function GameProvider({ children }) {
     prevUser.current = user;
   }, [state.games, user]);
 
+  // handle when state changes from online to offline
+  useEffect(() => {
+    const handleOffline = () => setLastOnline(new Date());
+    window.addEventListener('offline', handleOffline);
+    return () => window.removeEventListener('offline', handleOffline);
+  }, []);
+
   // handle when state changes from offline to online
   useEffect(() => {
     const handleOnline = () => {
@@ -85,6 +93,12 @@ export default function GameProvider({ children }) {
 
       state.games.map(async game => {
         const { id, ...rest } = game;
+
+        // if the game has not been modified, do not upload it
+        if (!lastOnline || rest.dateModified < lastOnline) {
+          return;
+        }
+
         try {
           if (typeof id === 'number') {
             const docRef = await getGameCollection(user).add(rest);
@@ -101,7 +115,7 @@ export default function GameProvider({ children }) {
     };
     window.addEventListener('online', handleOnline);
     return () => window.removeEventListener('online', handleOnline);
-  }, [state.games, user]);
+  }, [lastOnline, state.games, user]);
 
   // update state when new data arrives from API
   useEffect(() => {
@@ -113,7 +127,12 @@ export default function GameProvider({ children }) {
               type: 'UPDATE_GAMES',
               games: docs.map(doc => {
                 const game = doc.data();
-                return { ...game, date: game.date.toDate(), id: doc.id };
+                return {
+                  ...game,
+                  ...(game.dateCreated ? { dateCreated: game.dateCreated.toDate() } : {}),
+                  ...(game.dateModified ? { dateModified: game.dateModified.toDate() } : {}),
+                  id: doc.id,
+                };
               }),
             });
           }
@@ -130,8 +149,10 @@ export default function GameProvider({ children }) {
    * @param {string[]} players
    */
   const startNewGame = async players => {
+    const dateCreated = new Date();
     const newGame = {
-      date: new Date(),
+      dateCreated,
+      dateModified: dateCreated,
       players,
       rounds: [
         players.reduce((acc, curr) => ({ ...acc, [curr]: 7 }), {}),
@@ -172,16 +193,17 @@ export default function GameProvider({ children }) {
       if (game.players.some(player => lastRound[player])) {
         rounds = [...rounds, game.players.reduce((acc, curr) => ({ ...acc, [curr]: null }), {})];
       }
+      const updatedGame = { ...game, rounds, dateModified: new Date() };
       if (user && navigator.onLine) {
         try {
           getGameCollection(user)
             .doc(params.id)
-            .set({ ...game, rounds });
+            .set(updatedGame);
         } catch (err) {
           console.error(err);
         }
       }
-      return { ...game, rounds };
+      return updatedGame;
     });
     dispatch({ type: 'UPDATE_GAMES', games });
   };
