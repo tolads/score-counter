@@ -24,11 +24,6 @@ const reducer = (state, action) => {
         currentGameId: action.newGame.id,
         games: [...state.games, action.newGame],
       };
-    case 'UPDATE_SCORE':
-      return {
-        ...state,
-        games: action.games,
-      };
     case 'UPDATE_GAMES':
       return {
         ...state,
@@ -188,7 +183,7 @@ export default function GameProvider({ children }) {
       }
       return { ...game, rounds };
     });
-    dispatch({ type: 'UPDATE_SCORE', games });
+    dispatch({ type: 'UPDATE_GAMES', games });
   };
 
   return (

@@ -28,7 +28,6 @@ export default function Scores() {
     const { name, value } = event.target;
     const [round, player] = name.split('_');
     updateScore({
-      type: 'UPDATE_SCORE',
       id: gameState.currentGameId,
       round: Number(round),
       player,
